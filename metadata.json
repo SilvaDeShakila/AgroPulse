@@ -1,0 +1,6 @@
+{
+  "name": "AgroPulse — Smart Agriculture & Farm Operations Platform",
+  "description": "Enterprise-grade smart agriculture and farm operations management platform featuring crop lifecycle tracking, land plot management, transactional inventory, weather intelligence, harvest analytics, role-based workflows, and produce marketplace.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
