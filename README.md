@@ -400,7 +400,7 @@ No license has been specified in this README. Until a license is added to the re
 
 ## 👨‍💻 Author
 
-**Shaggy Dion**
+**Shakila De Silva**
 
 - GitHub: [@SilvaDeShakila](https://github.com/SilvaDeShakila)
 - Project: [AgroPulse — Smart Agriculture & Farm Operations Platform](https://github.com/SilvaDeShakila/AgroPulse)
