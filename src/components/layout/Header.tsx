@@ -79,11 +79,11 @@ export function Header({
         {/* Database Status Indicator */}
         <div
           className="hidden md:flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-slate-600 bg-slate-50 border border-slate-200 rounded-lg"
-          title={`Database Engine: ${dbStatus?.driver || 'Persistent Disk Engine'} (${dbStatus?.recordCounts?.farms || 0} farms, ${dbStatus?.recordCounts?.inventory || 0} SKUs)`}
+          title={`Database Engine: ${dbStatus?.liveHealth?.connected ? 'PostgreSQL' : dbStatus?.postgresConfigured ? 'PostgreSQL unavailable' : 'Persistent DB'} (${dbStatus?.recordCounts?.farms || 0} farms, ${dbStatus?.recordCounts?.inventory || 0} SKUs)`}
         >
-          <Database className="w-3.5 h-3.5 text-emerald-600" />
-          <span className="capitalize">{dbStatus?.driver === 'postgresql' ? 'PostgreSQL' : 'Persistent DB'}</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <Database className={`w-3.5 h-3.5 ${dbStatus?.liveHealth?.connected || !dbStatus?.postgresConfigured ? 'text-emerald-600' : 'text-rose-600'}`} />
+          <span className="capitalize">{dbStatus?.liveHealth?.connected ? 'PostgreSQL' : dbStatus?.postgresConfigured ? 'PostgreSQL unavailable' : 'Persistent DB'}</span>
+          <span className={`w-1.5 h-1.5 rounded-full ${dbStatus?.liveHealth?.connected || !dbStatus?.postgresConfigured ? 'bg-emerald-500' : 'bg-rose-500'}`} />
         </div>
 
         {/* Real User Profile Badge (Server Authorized) */}

@@ -80,6 +80,7 @@ class DatabaseManager {
   private dbFilePath: string;
   private isPgConnected = false;
   private isInitialized = false;
+  private postgresConnectionPromise: Promise<PostgresConnectionStatus> | null = null;
 
   constructor() {
     this.dataDir = path.resolve(process.cwd(), '.data');
@@ -93,25 +94,65 @@ class DatabaseManager {
 
     const isProduction = process.env.NODE_ENV === 'production';
     const databaseUrl = process.env.DATABASE_URL;
-    const allowDiskFallback = process.env.ALLOW_DISK_DB_FALLBACK === 'true';
 
-    // Production guard: Prohibit unconfigured PostgreSQL unless explicitly opted in
-    if (isProduction && !databaseUrl && !allowDiskFallback) {
-      const errorMsg =
-        '[AgroPulse Production Error] DATABASE_URL is not configured. Running in production mode without a verified PostgreSQL database is disallowed to prevent data loss. Set DATABASE_URL or set ALLOW_DISK_DB_FALLBACK=true for non-production demonstration.';
-      console.error(errorMsg);
+    // Production must use PostgreSQL. Never initialize disk persistence on Vercel.
+    if (isProduction) {
+      if (!databaseUrl) {
+        console.error('[AgroPulse Production Error] DATABASE_URL is not configured.');
+        this.isInitialized = true;
+        return;
+      }
+
+      console.log('[AgroPulse DB] Checking production PostgreSQL connection.');
+
+      this.postgresConnectionPromise = checkPostgresConnection()
+        .then((status) => {
+          if (!status.connected) {
+            this.isPgConnected = false;
+            console.error(`[AgroPulse DB] Production PostgreSQL connection failed: ${status.error}`);
+            return status;
+          }
+
+          // Avoid running schema migrations on serverless cold starts.
+          if (process.env.AUTO_MIGRATE === 'true') {
+            this.isPgConnected = false;
+            console.error('[AgroPulse DB] AUTO_MIGRATE must be disabled in production. Run migrations separately.');
+            return {
+              ...status,
+              connected: false,
+              error: 'Automatic migrations are disabled in production. Run migrations as a separate deployment step.',
+            };
+          }
+
+          this.isPgConnected = true;
+          console.log(`[AgroPulse DB] Connected to production PostgreSQL (${status.latencyMs}ms).`);
+          return status;
+        })
+        .catch((err: any) => {
+          this.isPgConnected = false;
+          console.error('[AgroPulse DB] Production connection check error:', err.message);
+          return {
+            configured: true,
+            connected: false,
+            driver: 'postgresql' as const,
+            error: err.message || 'Production PostgreSQL connection check failed.',
+          };
+        });
+
+      this.isInitialized = true;
+      return;
     }
 
-    // Attempt PostgreSQL connection if DATABASE_URL is provided
+    // Local development: PostgreSQL is optional; disk persistence remains available.
     if (databaseUrl) {
       console.log(`[AgroPulse DB] Attempting connection to PostgreSQL: ${sanitizeConnectionUrl(databaseUrl)}`);
-      checkPostgresConnection()
+
+      this.postgresConnectionPromise = checkPostgresConnection()
         .then(async (status) => {
           if (status.connected) {
             this.isPgConnected = true;
-            console.log(`[AgroPulse DB] ✓ Connected to PostgreSQL database: ${status.database} (${status.version}) in ${status.latencyMs}ms`);
+            console.log(`[AgroPulse DB] Connected to PostgreSQL database: ${status.database} (${status.version}) in ${status.latencyMs}ms`);
 
-            // Auto-migrate if enabled
             if (process.env.AUTO_MIGRATE === 'true') {
               try {
                 const migResult = await runMigrations();
@@ -125,22 +166,26 @@ class DatabaseManager {
           } else {
             this.isPgConnected = false;
             console.warn(`[AgroPulse DB] PostgreSQL connection failed: ${status.error}`);
-            if (isProduction && !allowDiskFallback) {
-              console.error('[AgroPulse DB] Critical: Unable to connect to primary PostgreSQL database in production.');
-            } else {
-              console.log(`[AgroPulse DB] Falling back to local development disk persistence at ${this.dbFilePath}`);
-            }
+            console.log(`[AgroPulse DB] Falling back to local development disk persistence at ${this.dbFilePath}`);
           }
+
+          return status;
         })
-        .catch((err) => {
+        .catch((err: any) => {
           this.isPgConnected = false;
           console.warn('[AgroPulse DB] PostgreSQL check error:', err.message);
+          return {
+            configured: true,
+            connected: false,
+            driver: 'postgresql' as const,
+            error: err.message || 'PostgreSQL connection check failed.',
+          };
         });
     } else {
-      console.log(`[AgroPulse DB] DATABASE_URL is not set. Operating in LOCAL_DEVELOPMENT mode using file persistence at ${this.dbFilePath}. (PostgreSQL is NOT connected).`);
+      console.log(`[AgroPulse DB] DATABASE_URL is not set. Operating in LOCAL_DEVELOPMENT mode using file persistence at ${this.dbFilePath}.`);
     }
 
-    // Ensure data directory exists on server filesystem for local persistence
+    // Local-only disk initialization.
     if (!fs.existsSync(this.dataDir)) {
       try {
         fs.mkdirSync(this.dataDir, { recursive: true });
@@ -149,7 +194,6 @@ class DatabaseManager {
       }
     }
 
-    // Load from disk if exists, otherwise write initial seed baseline with hashed passwords
     if (fs.existsSync(this.dbFilePath)) {
       try {
         const raw = fs.readFileSync(this.dbFilePath, 'utf-8');
@@ -170,6 +214,25 @@ class DatabaseManager {
     this.isInitialized = true;
   }
 
+  public async waitUntilReady(): Promise<void> {
+    if (process.env.NODE_ENV === 'production') {
+      if (!process.env.DATABASE_URL) {
+        throw new Error('Production database is not configured.');
+      }
+
+      const status = await this.postgresConnectionPromise;
+      if (!status?.connected || !this.isPgConnected) {
+        throw new Error(status?.error || 'Production PostgreSQL database is not ready.');
+      }
+
+      return;
+    }
+
+    // In development, wait for the optional PostgreSQL check but retain disk fallback.
+    if (this.postgresConnectionPromise) {
+      await this.postgresConnectionPromise;
+    }
+  }
   private getInitialBaseline(): DatabaseState {
     const defaultPasswordHash = bcrypt.hashSync('AgroPulse2026!', 10);
 
@@ -204,6 +267,7 @@ class DatabaseManager {
 
   // Atomic file save with write-ahead journal and temporary swap
   private saveToDisk() {
+    if (process.env.NODE_ENV === 'production') return;
     this.state.meta.lastSavedAt = new Date().toISOString();
     const payload = JSON.stringify(this.state, null, 2);
     const tmpFile = `${this.dbFilePath}.tmp`;
@@ -226,7 +290,7 @@ class DatabaseManager {
 
   public getStatus() {
     return {
-      driver: this.isPgConnected ? 'postgresql' : 'persistent_disk_engine',
+      driver: this.isPgConnected ? 'postgresql' : process.env.NODE_ENV === 'production' ? 'unavailable' : 'persistent_disk_engine',
       postgresConfigured: !!process.env.DATABASE_URL,
       postgresConnected: this.isPgConnected,
       diskFilePath: this.dbFilePath,

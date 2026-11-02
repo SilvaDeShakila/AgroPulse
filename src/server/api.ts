@@ -13,11 +13,12 @@ export const apiRouter = Router();
 // ====================================================================
 apiRouter.get('/health', async (req: Request, res: Response) => {
   const pgHealth = await serverDb.checkHealth();
-  res.json({
-    status: 'ok',
+  const productionUnavailable = process.env.NODE_ENV === 'production' && !pgHealth.connected;
+  res.status(productionUnavailable ? 503 : 200).json({
+    status: pgHealth.connected ? 'ok' : productionUnavailable ? 'degraded' : 'ok',
     service: 'AgroPulse Core REST API v1',
     runtime: 'Node.js Express + TypeScript',
-    databaseDriver: pgHealth.connected ? 'postgresql' : 'persistent_disk_engine',
+    databaseDriver: pgHealth.connected ? 'postgresql' : productionUnavailable ? 'unavailable' : 'persistent_disk_engine',
     databaseConnected: pgHealth.connected,
     timestamp: new Date().toISOString(),
     version: '1.0.0',
@@ -36,6 +37,21 @@ apiRouter.get('/system/db-status', async (req: Request, res: Response) => {
   });
 });
 
+/**
+ * Production database readiness guard.
+ * Health and database-status diagnostics above remain accessible when PostgreSQL is unavailable.
+ */
+apiRouter.use(async (_req: Request, res: Response, next) => {
+  try {
+    await serverDb.waitUntilReady();
+    next();
+  } catch {
+    res.status(503).json({
+      error: 'DatabaseUnavailable',
+      message: 'The service database is currently unavailable. Please try again later.',
+    });
+  }
+});
 // Admin-only reset endpoint (restricted strictly to offline local disk development)
 apiRouter.post(
   '/system/reset-demo',
