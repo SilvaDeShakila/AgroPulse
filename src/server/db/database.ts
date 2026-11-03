@@ -220,9 +220,14 @@ class DatabaseManager {
         throw new Error('Production database is not configured.');
       }
 
-      const status = await this.postgresConnectionPromise;
-      if (!status?.connected || !this.isPgConnected) {
-        throw new Error(status?.error || 'Production PostgreSQL database is not ready.');
+      if (process.env.AUTO_MIGRATE === 'true') {
+        throw new Error('Automatic migrations are disabled in production. Run migrations separately.');
+      }
+
+      const status = await checkPostgresConnection();
+      this.isPgConnected = status.connected;
+      if (!status.connected) {
+        throw new Error(status.error || 'Production PostgreSQL database is not ready.');
       }
 
       return;
