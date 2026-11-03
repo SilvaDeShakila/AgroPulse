@@ -1,4 +1,4 @@
-import { checkPostgresConnection, sanitizeConnectionUrl, closePostgresPool } from './postgresPool';
+import { checkPostgresConnection, sanitizeConnectionUrl, closePostgresPool } from './postgresPool.js';
 
 async function main() {
   console.log('================================================================');

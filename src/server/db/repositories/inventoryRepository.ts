@@ -1,5 +1,5 @@
-import { executeQuery, withTransaction } from '../postgresPool';
-import { InventoryItem, StockMovement, Supplier, InventoryCategory } from '../../../types';
+import { executeQuery, withTransaction } from '../postgresPool.js';
+import { InventoryItem, StockMovement, Supplier, InventoryCategory } from '../../../types/index.js';
 
 function mapItemRow(row: any): InventoryItem {
   return {

@@ -1,8 +1,7 @@
-﻿import 'dotenv/config';
+import 'dotenv/config';
 import express from 'express';
-import { createServer as createViteServer } from 'vite';
-import { apiRouter } from './src/server/api';
-import { closePostgresPool } from './src/server/db/postgresPool';
+import { apiRouter } from './src/server/api.js';
+import { closePostgresPool } from './src/server/db/postgresPool.js';
 import path from 'node:path';
 
 const app = express();
@@ -34,6 +33,7 @@ async function startLocalServer() {
       res.sendFile(path.join(publicPath, 'index.html'));
     });
   } else {
+    const { createServer: createViteServer } = await import('vite');
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
@@ -72,3 +72,4 @@ if (!isVercel) {
     process.exit(1);
   });
 }
+

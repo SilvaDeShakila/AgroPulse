@@ -2,7 +2,7 @@ import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getPostgresPool, checkPostgresConnection, closePostgresPool } from './postgresPool';
+import { getPostgresPool, checkPostgresConnection, closePostgresPool } from './postgresPool.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

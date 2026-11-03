@@ -1,5 +1,5 @@
-import { executeQuery } from '../postgresPool';
-import { AuditLog } from '../../../types';
+import { executeQuery } from '../postgresPool.js';
+import { AuditLog } from '../../../types/index.js';
 
 function mapAuditRow(row: any): AuditLog {
   return {

@@ -1,8 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { serverDb } from '../db/database';
-import { UserRole } from '../../types';
-import { JWT_SECRET } from '../middleware/auth';
+import { serverDb } from '../db/database.js';
+import { UserRole } from '../../types/index.js';
+import { JWT_SECRET } from '../middleware/auth.js';
 
 export class AuthService {
   public static async register(data: {

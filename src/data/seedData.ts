@@ -14,7 +14,7 @@ import {
   Order,
   WeatherData,
   AuditLog
-} from '../types';
+} from '../types/index.js';
 
 export const SEED_USERS: User[] = [
   {

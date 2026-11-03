@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import bcrypt from 'bcryptjs';
-import { checkPostgresConnection, withTransaction, closePostgresPool } from './postgresPool';
+import { checkPostgresConnection, withTransaction, closePostgresPool } from './postgresPool.js';
 import {
   SEED_USERS,
   SEED_FARMS,
@@ -16,15 +16,15 @@ import {
   SEED_PRODUCE_LISTINGS,
   SEED_ORDERS,
   SEED_AUDIT_LOGS,
-} from '../../data/seedData';
-import { userRepository } from './repositories/userRepository';
-import { farmRepository } from './repositories/farmRepository';
-import { cropRepository } from './repositories/cropRepository';
-import { taskRepository } from './repositories/taskRepository';
-import { inventoryRepository } from './repositories/inventoryRepository';
-import { financeRepository } from './repositories/financeRepository';
-import { marketplaceRepository } from './repositories/marketplaceRepository';
-import { auditRepository } from './repositories/auditRepository';
+} from '../../data/seedData.js';
+import { userRepository } from './repositories/userRepository.js';
+import { farmRepository } from './repositories/farmRepository.js';
+import { cropRepository } from './repositories/cropRepository.js';
+import { taskRepository } from './repositories/taskRepository.js';
+import { inventoryRepository } from './repositories/inventoryRepository.js';
+import { financeRepository } from './repositories/financeRepository.js';
+import { marketplaceRepository } from './repositories/marketplaceRepository.js';
+import { auditRepository } from './repositories/auditRepository.js';
 
 export async function seedPostgresDatabase(): Promise<{ success: boolean; message: string }> {
   const status = await checkPostgresConnection();

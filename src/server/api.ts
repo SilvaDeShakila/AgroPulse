@@ -1,10 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { serverDb } from './db/database';
-import { authMiddleware, AuthenticatedRequest } from './middleware/auth';
-import { requireRole, requireFarmOwnership } from './middleware/rbac';
-import { rateLimit } from './middleware/rateLimit';
-import { AuthService } from './services/authService';
-import { WeatherService } from './services/weatherService';
+import { serverDb } from './db/database.js';
+import { authMiddleware, AuthenticatedRequest } from './middleware/auth.js';
+import { requireRole, requireFarmOwnership } from './middleware/rbac.js';
+import { rateLimit } from './middleware/rateLimit.js';
+import { AuthService } from './services/authService.js';
+import { WeatherService } from './services/weatherService.js';
 
 export const apiRouter = Router();
 

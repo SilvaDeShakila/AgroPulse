@@ -4,3 +4,6 @@ deployment-backup-before-express/
 
 # Local development database files
 .data/
+
+# Generated Vite production output
+public/

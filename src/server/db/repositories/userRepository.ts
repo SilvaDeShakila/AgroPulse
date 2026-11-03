@@ -1,5 +1,5 @@
-import { executeQuery } from '../postgresPool';
-import { User, UserRole } from '../../../types';
+import { executeQuery } from '../postgresPool.js';
+import { User, UserRole } from '../../../types/index.js';
 
 export interface UserRecord extends User {
   passwordHash: string;

@@ -1,5 +1,5 @@
-import { executeQuery } from '../postgresPool';
-import { Expense, HarvestRecord } from '../../../types';
+import { executeQuery } from '../postgresPool.js';
+import { Expense, HarvestRecord } from '../../../types/index.js';
 
 function mapHarvestRow(row: any): HarvestRecord {
   const qty = Number(row.quantity);

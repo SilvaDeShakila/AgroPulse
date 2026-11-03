@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { serverDb } from '../db/database';
-import { UserRole } from '../../types';
+import { serverDb } from '../db/database.js';
+import { UserRole } from '../../types/index.js';
 
 const INSECURE_DEFAULT_SECRETS = [
   'agropulse-enterprise-jwt-secret-key-2026-production',

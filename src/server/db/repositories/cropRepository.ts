@@ -1,5 +1,5 @@
-import { executeQuery } from '../postgresPool';
-import { CropCycle, CropObservation, GrowthStage, UserRole } from '../../../types';
+import { executeQuery } from '../postgresPool.js';
+import { CropCycle, CropObservation, GrowthStage, UserRole } from '../../../types/index.js';
 
 function mapCycleRow(row: any): CropCycle {
   return {

@@ -1,5 +1,5 @@
-import { executeQuery } from '../postgresPool';
-import { FarmTask, TaskCategory, TaskPriority, TaskStatus } from '../../../types';
+import { executeQuery } from '../postgresPool.js';
+import { FarmTask, TaskCategory, TaskPriority, TaskStatus } from '../../../types/index.js';
 
 function mapTaskRow(row: any): FarmTask {
   return {

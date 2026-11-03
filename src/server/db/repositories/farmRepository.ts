@@ -1,5 +1,5 @@
-import { executeQuery, withTransaction } from '../postgresPool';
-import { Farm, LandPlot, UserRole, AreaUnit } from '../../../types';
+import { executeQuery, withTransaction } from '../postgresPool.js';
+import { Farm, LandPlot, UserRole, AreaUnit } from '../../../types/index.js';
 
 function mapFarmRow(row: any): Farm {
   return {

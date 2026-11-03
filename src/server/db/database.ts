@@ -18,7 +18,7 @@ import {
   Order,
   OrderStatus,
   AuditLog,
-} from '../../types';
+} from '../../types/index.js';
 import {
   SEED_USERS,
   SEED_FARMS,
@@ -34,22 +34,22 @@ import {
   SEED_PRODUCE_LISTINGS,
   SEED_ORDERS,
   SEED_AUDIT_LOGS,
-} from '../../data/seedData';
+} from '../../data/seedData.js';
 import {
   getPostgresPool,
   checkPostgresConnection,
   sanitizeConnectionUrl,
   PostgresConnectionStatus,
-} from './postgresPool';
-import { runMigrations } from './migrator';
-import { userRepository } from './repositories/userRepository';
-import { farmRepository } from './repositories/farmRepository';
-import { cropRepository } from './repositories/cropRepository';
-import { taskRepository } from './repositories/taskRepository';
-import { inventoryRepository } from './repositories/inventoryRepository';
-import { financeRepository } from './repositories/financeRepository';
-import { marketplaceRepository } from './repositories/marketplaceRepository';
-import { auditRepository } from './repositories/auditRepository';
+} from './postgresPool.js';
+import { runMigrations } from './migrator.js';
+import { userRepository } from './repositories/userRepository.js';
+import { farmRepository } from './repositories/farmRepository.js';
+import { cropRepository } from './repositories/cropRepository.js';
+import { taskRepository } from './repositories/taskRepository.js';
+import { inventoryRepository } from './repositories/inventoryRepository.js';
+import { financeRepository } from './repositories/financeRepository.js';
+import { marketplaceRepository } from './repositories/marketplaceRepository.js';
+import { auditRepository } from './repositories/auditRepository.js';
 
 export interface DatabaseState {
   users: (User & { passwordHash: string })[];

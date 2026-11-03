@@ -1,5 +1,5 @@
-import { executeQuery, withTransaction } from '../postgresPool';
-import { ProduceListing, Order, OrderStatus } from '../../../types';
+import { executeQuery, withTransaction } from '../postgresPool.js';
+import { ProduceListing, Order, OrderStatus } from '../../../types/index.js';
 
 function mapListingRow(row: any): ProduceListing {
   return {

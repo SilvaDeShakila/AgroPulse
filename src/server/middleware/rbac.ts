@@ -1,7 +1,7 @@
 import { Response, NextFunction } from 'express';
-import { AuthenticatedRequest } from './auth';
-import { UserRole } from '../../types';
-import { serverDb } from '../db/database';
+import { AuthenticatedRequest } from './auth.js';
+import { UserRole } from '../../types/index.js';
+import { serverDb } from '../db/database.js';
 
 export function requireRole(allowedRoles: UserRole[]) {
   return async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

@@ -1,4 +1,4 @@
-import { WeatherData } from '../../types';
+import { WeatherData } from '../../types/index.js';
 
 interface DistrictCoordinates {
   latitude: number;
