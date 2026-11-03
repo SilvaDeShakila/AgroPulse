@@ -1,32 +1,39 @@
-import 'dotenv/config';
+﻿import 'dotenv/config';
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import { apiRouter } from './src/server/api';
 import { closePostgresPool } from './src/server/db/postgresPool';
-import path from 'path';
+import path from 'node:path';
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+const app = express();
+const isVercel = process.env.VERCEL === '1';
+const isProduction = process.env.NODE_ENV === 'production';
 
-  // JSON request body parser
-  app.use(express.json());
+app.use(express.json());
 
-  // Mount versioned REST API endpoints under /api/v1
-  app.use('/api/v1', apiRouter);
+// Existing API routes
+app.use('/api/v1', apiRouter);
 
-  // Health check on root API
-  app.get('/api', (req, res) => {
-    res.json({
-      message: 'AgroPulse Core API',
-      documentation: '/api/v1/health',
-      status: 'operational',
-    });
+app.get('/api', (_req, res) => {
+  res.json({
+    message: 'AgroPulse Core API',
+    documentation: '/api/v1/health',
+    status: 'operational',
   });
+});
 
-  // Mount Vite development middlewares
-  const isProduction = process.env.NODE_ENV === 'production';
-  if (!isProduction) {
+// Vercel detects and deploys this Express application.
+export default app;
+
+// Start a local server only outside Vercel.
+async function startLocalServer() {
+  if (isProduction) {
+    const publicPath = path.resolve(process.cwd(), 'public');
+    app.use(express.static(publicPath));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(publicPath, 'index.html'));
+    });
+  } else {
     const vite = await createViteServer({
       server: {
         middlewareMode: true,
@@ -37,21 +44,15 @@ async function startServer() {
     });
 
     app.use(vite.middlewares);
-  } else {
-    // Production static serving
-    const distPath = path.resolve(__dirname, 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.resolve(distPath, 'index.html'));
-    });
   }
+
+  const PORT = Number(process.env.PORT) || 3000;
 
   const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`[AgroPulse Full-Stack] Server running on port ${PORT}`);
     console.log(`[AgroPulse API v1] Endpoints ready at http://localhost:${PORT}/api/v1`);
   });
 
-  // Graceful shutdown handling
   const shutdown = async (signal: string) => {
     console.log(`\n[AgroPulse] Received ${signal}. Draining connections and shutting down...`);
     server.close(async () => {
@@ -65,7 +66,9 @@ async function startServer() {
   process.on('SIGTERM', () => shutdown('SIGTERM'));
 }
 
-startServer().catch(err => {
-  console.error('[AgroPulse] Server failed to start:', err);
-  process.exit(1);
-});
+if (!isVercel) {
+  startLocalServer().catch(err => {
+    console.error('[AgroPulse] Server failed to start:', err);
+    process.exit(1);
+  });
+}

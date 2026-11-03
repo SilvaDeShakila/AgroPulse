@@ -1,0 +1,6 @@
+deployment-backup-before-express/
+*.backup*
+*.bak-*
+
+# Local development database files
+.data/

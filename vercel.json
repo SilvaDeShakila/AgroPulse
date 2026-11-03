@@ -5,5 +5,14 @@
       "source": "/:path((?!api(?:/|$)).*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "framework": "express",
+  "buildCommand": "npm run build",
+  "functions": {
+    "server.ts": {
+      "excludeFiles": ".data/**"
+    }
+  }
 }
+
+
