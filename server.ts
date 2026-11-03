@@ -21,6 +21,8 @@ app.get('/api', (_req, res) => {
   });
 });
 
+app.use(express.static(path.resolve(process.cwd(), 'public')));
+
 // Vercel detects and deploys this Express application.
 export default app;
 
