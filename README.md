@@ -3,6 +3,13 @@
 <p align="center">
   <strong>A smarter way to manage farms, crops, resources, and agricultural business operations.</strong>
 </p>
+<p align="center">
+  <a href="https://agro-pulse-delta.vercel.app">
+    <img src="https://img.shields.io/badge/LIVE%20DEMO-AgroPulse-16A34A?style=for-the-badge&logo=vercel&logoColor=white" alt="AgroPulse Live Demo">
+  </a>
+  <br>
+  <a href="https://agro-pulse-delta.vercel.app"><strong>🚀 Open AgroPulse Live Application</strong></a>
+</p>
 
 <p align="center">
   <a href="https://github.com/SilvaDeShakila/AgroPulse">
